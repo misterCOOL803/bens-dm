@@ -1,0 +1,10 @@
+# Voeg deze regel toe aan ~/.xinitrc (maak het bestand aan als het nog niet
+# bestaat) om bens-dm te starten met `startx`, zonder een display manager:
+#
+#   exec /usr/bin/bens-dm
+#
+# Let op: dit moet de LAATSTE regel van .xinitrc zijn — X sluit af zodra
+# dit commando stopt. Start eventuele achtergrond-applicaties (compositor,
+# panel, etc. — die volgen in latere stappen) er dus vóór, met een & erachter.
+
+exec /usr/bin/bens-dm

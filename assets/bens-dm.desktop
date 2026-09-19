@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Bens DM
+Comment=Bens OS window manager — eigen X11/C++ desktopomgeving, geen Wayland
+Exec=/usr/bin/bens-dm
+Type=Application
+DesktopNames=BensDM

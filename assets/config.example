@@ -1,0 +1,22 @@
+# Voorbeeldconfig voor bens-dm.
+#
+# Kopieer dit bestand naar:
+#   ~/.config/bens-dm/config
+# (of $XDG_CONFIG_HOME/bens-dm/config als je die env var gebruikt)
+#
+# Regels beginnend met '#' zijn commentaar. Onbekende keys of foutieve
+# waarden worden genegeerd (met een waarschuwing op stderr) — bens-dm start
+# altijd, ook met een kapotte of ontbrekende config.
+
+# Ruimte tussen/rond getilede vensters, in pixels.
+gap = 8
+
+# Aandeel van het scherm voor het master-venster in Tiling-mode (0.1 - 0.9).
+master_ratio = 0.55
+
+# Modifier-toets voor alle bens-dm-sneltoetsen: 'super' of 'alt'.
+mod_key = super
+
+# Commando dat gestart wordt bij mod_key + Enter. Simpele spatie-gescheiden
+# argumenten, geen shell-quoting/expansie.
+terminal = xterm
