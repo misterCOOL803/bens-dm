@@ -170,4 +170,11 @@ private:
     static bool wm_detected_; // true als een andere WM al SubstructureRedirect heeft
 };
 
+class WindowManager {
+public:
+    void FocusWindow(Window w);
+    void CycleFocus(int direction);
+};
+
+
 } // namespace bensdm
