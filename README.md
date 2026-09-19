@@ -535,9 +535,14 @@ At that point, Bens DM is no longer something you're launching manually from a t
 
 It is now responsible for your actual desktop.
 
-Good luck.
+and its alive. 
 
-Project structure
+hunting for dumb engineers.
+
+Good luck.
+# Project structure
+
+```text
 bens-dm/
 ├── src/
 │   ├── main.cpp
@@ -551,8 +556,11 @@ bens-dm/
 ├── tests/
 ├── CMakeLists.txt
 └── README.md
+```
 
-Current state
+# Current state
+
+```text
 Window management       DONE
 Tiling                  DONE
 Stacking                DONE
@@ -567,8 +575,9 @@ Multiple masters        NOT YET
 Workspaces              NOT YET
 Panel                   COMING SOON™
 Launcher                NO
-Settings app             NO
-Wayland                  NO
+Settings app            NO
+Wayland                 NO
+```
 
 
 And, most importantly:
