@@ -1,164 +1,596 @@
-# Bens DM
+Bens DM
 
-Een volledig zelfgeschreven X11-desktopomgeving/window manager voor Bens OS
-(Debian Trixie-gebaseerd). Geen Wayland, geen wrapper rond XFCE/KDE/GNOME/
-Openbox — een eigen C++/Xlib-kern.
+A fully custom X11 desktop environment / window manager for Bens OS.
 
-## Status: stap 2 van de ontwikkelstrategie
+Written from scratch in C++ with Xlib.
 
-**Stap 1 (minimale WM):**
+No XFCE.
+No KDE.
+No GNOME.
+No Openbox.
+No Wayland.
 
-- Opent de X-display en claimt `SubstructureRedirectMask` op de root window
-  (de kern van "zijn" van een window manager).
-- Detecteert of er al een andere WM draait en stopt dan netjes i.p.v. te
-  crashen.
-- Detecteert nieuwe windows (`MapRequest`) en beheert ze.
-- Focus: focus-follows-mouse via `EnterNotify` + click-to-focus bij
-  interactie.
-- Verplaatsen: `Alt + linkermuisknop` slepen.
-- Resizen: `Alt + rechtermuisknop` slepen.
-- Sluiten: `Super + Q` (probeert eerst `WM_DELETE_WINDOW`, valt anders terug
-  op `XKillClient`).
+Just X11, C++, and a steadily increasing amount of code that now controls your entire desktop.
 
-**Stap 2 (tiling-layout-engine, nieuw):**
+Current status: Step 2 of the development strategy
+Base OS: Debian Trixie
+Display server: X11
+Window manager: Bens DM
+Launcher: The terminal
+Panel: Coming soon™
+Regret: Not yet measured
 
-- `src/layouts/tiling_layout.cpp` implementeert een master-stack layout:
-  het eerst geopende venster wordt "master" (linkerdeel van het scherm),
-  overige vensters worden rechts verticaal gestapeld met gelijke hoogte.
-- `Super + Space` wisselt nu écht tussen Tiling en Stacking:
-  - **Tiling**: alle beheerde vensters worden automatisch herplaatst volgens
-    de master-stack-berekening, elke keer als een venster opent/sluit of
-    als je expliciet wisselt.
-  - **Stacking**: elk venster valt terug op zijn eigen "vrije" geometrie
-    (waar het zelf werd geopend, of waar jij het laatst met Alt+slepen hebt
-    neergezet) — dus geen tiling-posities die blijven "kleven" na het
-    terugschakelen.
-- Losse, dependency-vrije unit tests in `tests/layout_test.cpp` die de
-  tiling-wiskunde controleren zonder dat er een X-server nodig is
-  (`ctest` in de build-map).
+What is Bens DM?
 
-**Stap 3 (configuratielaag):**
+Bens DM is the window manager for Bens OS.
 
-- `src/config/config.cpp` leest `~/.config/bens-dm/config` (of
-  `$XDG_CONFIG_HOME/bens-dm/config`) in — simpele `key = value`-syntax,
-  `#` voor commentaar. Ontbreekt het bestand, dan draait bens-dm gewoon met
-  ingebouwde defaults; foutieve regels worden overgeslagen met een
-  waarschuwing i.p.v. dat bens-dm weigert te starten.
-- Instelbaar: `gap`, `master_ratio`, `mod_key` (`super` of `alt`) en
-  `terminal` (commando voor de sneltoets hieronder).
-- **mod + Enter** start een terminal (`fork`+`execvp`, met `SIGCHLD` op
-  `SIG_IGN` zodat er geen zombie-processen ontstaan).
-- Voorbeeldconfig: `assets/config.example` — kopieer naar
-  `~/.config/bens-dm/config` om aan te passen.
+It owns the X11 root window, manages windows, handles input, calculates tiling layouts, launches terminals, supports floating windows, and generally decides where things are allowed to exist on the screen.
 
-**Stap 4 (session launcher, floating, tiling-swap, grens-slepen, nieuw):**
+There is no desktop environment underneath it.
 
-- **Session launcher**: `assets/bens-dm.desktop` wordt via `make install`
-  naar `share/xsessions/` geïnstalleerd, zodat display managers (LightDM,
-  SDDM, ...) "Bens DM" tonen als kiesbare sessie. Gebruik je liever
-  `startx`/`xinit`, zie `assets/xinitrc.example`.
-- **Floating windows**: `mod + F` maakt het gefocuste venster los van de
-  tiling-grid. Het houdt daarna zijn eigen positie/grootte aan, blijft
-  altijd bovenop getilede vensters, en is te verplaatsen (`Alt` +
-  linkersleep) en te resizen (`Alt` + rechtersleep) — ook terwijl Tiling
-  actief is. Nogmaals `mod + F` maakt het weer een normaal getild venster.
-- **Vensters wisselen van plek**: in Tiling-mode is `Alt` + linkersleep op
-  een getild (niet-floating) venster geen verplaatsing, maar een *swap* —
-  laat los boven een ander getild venster om van plaats te wisselen.
-  Ook via toetsenbord: **mod + Shift + J / K** wisselt het gefocuste
-  venster met de volgende/vorige in de tiling-volgorde (met wrap-around).
-- **Grenzen tussen tiles slepen**: klik-en-sleep (géén modifier nodig) op
-  de rand tussen master en stack, of tussen twee stack-vensters onderling,
-  om de verhouding aan te passen. Dit werkt via een klik direct op de
-  root-achtergrond in de gap tussen vensters — er is dus geen aparte
-  titelbalk/rand-decoratie voor nodig.
-- **Reset**: **mod + R** zet de master-ratio en alle stack-verhoudingen
-  terug naar de config-defaults (de "reset-knop").
+There is no existing window manager being wrapped.
 
-## Sneltoetsentabel (huidige stand)
+There is no GNOME/KDE/XFCE doing the difficult parts in the background.
 
-| Sneltoets              | Actie                                          |
-|-------------------------|------------------------------------------------|
-| `mod + Space`           | Wissel Tiling ↔ Stacking                        |
-| `mod + Enter`           | Terminal starten                                |
-| `mod + Q`               | Gefocust venster sluiten                        |
-| `mod + F`               | Floating aan/uit voor gefocust venster          |
-| `mod + R`               | Tiling-verhoudingen resetten naar defaults      |
-| `mod + Shift + J / K`   | Gefocust venster wisselen met volgende/vorige   |
-| `Alt` + linkersleep     | Verplaatsen (floating/Stacking) of swap (Tiling)|
-| `Alt` + rechtersleep    | Resizen (alleen floating/Stacking)              |
-| Slepen op tile-grens    | Verhouding tussen tiles aanpassen (geen mod nodig) |
+Bens DM is the difficult part.
 
-(`mod` = `Super` of `Alt`, instelbaar via `mod_key` in de config.)
+Current features
+Window management
 
-## Ontbreekt nog (bewust, voor latere stappen)
+Bens DM claims SubstructureRedirectMask on the X11 root window.
 
-- Meerdere master-vensters
-- Workspace-management
-- Panel/launcher/settings-app
-- Numlock/Capslock-onafhankelijke keybindings (een bekende beperking van
-  `XGrabKey` met een vaste modifier-mask, nog niet opgelost)
+This is the part where it officially becomes the window manager instead of merely being a program that happens to draw things.
 
-## Bouwen
+It:
 
-Vereist: CMake ≥ 3.16, een C++17-compiler, en X11-development headers
-(`libx11-dev` op Debian/Ubuntu).
+opens the X display
 
-```sh
-mkdir build && cd build
+checks whether another WM is already running
+
+exits cleanly if one is detected
+
+handles new windows through MapRequest
+
+manages focus
+
+supports focus-follows-mouse
+
+supports click-to-focus
+
+moves windows
+
+resizes windows
+
+closes windows
+
+If another window manager already owns the root window, Bens DM refuses to start instead of having an argument with it.
+
+Moving and resizing
+
+There are no titlebars.
+
+There are no visible resize handles.
+
+This is intentional.
+
+Window manipulation is handled directly through mouse + modifier combinations:
+
+Alt + Left Drag    Move window
+Alt + Right Drag   Resize window
+
+
+Closing the focused window:
+
+Super + Q
+
+
+Bens DM first attempts to send WM_DELETE_WINDOW.
+
+If the application doesn't support that, it falls back to XKillClient.
+
+Because sometimes the application needs to be informed politely.
+
+And sometimes it doesn't.
+
+Tiling
+
+The current layout engine uses a master-stack layout.
+
+The first managed window becomes the master.
+
+Everything else goes into the stack.
+
+Conceptually:
+
+┌──────────────────────┬──────────────────┐
+│                      │                  │
+│                      │     Window 2     │
+│                      │                  │
+│       MASTER         ├──────────────────┤
+│                      │                  │
+│                      │     Window 3     │
+│                      │                  │
+│                      ├──────────────────┤
+│                      │                  │
+│                      │     Window 4     │
+└──────────────────────┴──────────────────┘
+
+
+The layout implementation lives in:
+
+src/layouts/tiling_layout.cpp
+
+
+The layout math is tested independently from X11, so the actual geometry calculations can be verified without starting a graphical session.
+
+Which is useful, because debugging an X11 window manager by repeatedly destroying your own desktop gets old fairly quickly.
+
+Tiling and Stacking
+
+mod + Space switches between two modes.
+
+Tiling
+
+Bens DM controls the geometry.
+
+Windows are automatically positioned using the master-stack layout whenever windows are opened, closed, or the layout is explicitly refreshed.
+
+Stacking
+
+Bens DM stops imposing the tiling geometry.
+
+Windows return to their own stored positions and sizes.
+
+If you moved a window somewhere manually, that position is preserved.
+
+Switching back to Tiling later does not permanently overwrite the window's free geometry.
+
+This means Tiling is a layout mode rather than a permanent relocation of every window.
+
+Floating
+
+mod + F toggles floating mode for the focused window.
+
+A floating window:
+
+is removed from the tiling grid
+
+keeps its own position and size
+
+remains above tiled windows
+
+can still be moved
+
+can still be resized
+
+can coexist with tiled windows while Tiling mode is active
+
+Press mod + F again and the window returns to the tiling system.
+
+At this point Bens DM has both a tiling system and a floating system, which is starting to look suspiciously like an actual window manager.
+
+Swapping windows
+
+In Tiling mode, Alt + Left Drag changes meaning.
+
+For normal floating or stacking windows:
+
+Alt + Left Drag
+
+
+means move.
+
+For tiled windows:
+
+Alt + Left Drag
+
+
+means swap.
+
+Drag one tiled window over another and release.
+
+The two windows exchange positions in the tiling order.
+
+There are also keyboard controls:
+
+mod + Shift + J
+mod + Shift + K
+
+
+These swap the focused window with the next or previous window in the tiling order.
+
+The list wraps around.
+
+Resizing tiles
+
+Tile boundaries can be dragged directly.
+
+No modifier is required.
+
+No titlebar is required.
+
+No special decoration is required.
+
+Click and drag the boundary between:
+
+the master and stack
+
+two stack windows
+
+and the corresponding ratio changes.
+
+The interaction is handled through the root background in the gap between windows.
+
+The desktop background is therefore, technically, part of the user interface.
+
+This was not originally on the roadmap.
+
+Configuration
+
+Bens DM reads:
+
+~/.config/bens-dm/config
+
+
+or:
+
+$XDG_CONFIG_HOME/bens-dm/config
+
+
+Configuration uses a simple:
+
+key = value
+
+
+syntax.
+
+Comments use #.
+
+If the configuration file doesn't exist, Bens DM uses built-in defaults.
+
+Invalid lines are ignored with a warning rather than preventing the WM from starting.
+
+Current options:
+
+gap
+master_ratio
+mod_key
+terminal
+
+
+mod_key can be:
+
+super
+alt
+
+
+The terminal command is started using fork() and execvp().
+
+SIGCHLD is set to SIG_IGN so terminal processes don't leave zombie processes behind.
+
+The launcher
+
+There isn't one.
+
+There is a terminal.
+
+mod + Enter
+
+
+starts it.
+
+That's currently the entire application-launching strategy.
+
+This is not necessarily a limitation.
+
+It's also not necessarily a good idea.
+
+It is, however, extremely functional.
+
+Session integration
+
+Bens DM can be installed as a real X11 desktop session.
+
+The session file:
+
+assets/bens-dm.desktop
+
+
+is installed to:
+
+/usr/share/xsessions/
+
+
+using make install.
+
+This allows display managers such as LightDM and SDDM to present:
+
+Bens DM
+
+
+as an available session.
+
+For startx / xinit, an example configuration is provided:
+
+assets/xinitrc.example
+
+Development strategy
+Step 1 — Minimal WM
+
+The original goal was simply to make a functioning window manager.
+
+Implemented:
+
+X display initialization
+
+root window ownership
+
+existing-WM detection
+
+MapRequest handling
+
+focus management
+
+focus-follows-mouse
+
+click-to-focus
+
+window moving
+
+window resizing
+
+window closing
+
+WM_DELETE_WINDOW
+
+XKillClient fallback
+
+At this point, Bens DM could manage windows.
+
+That was the first major milestone.
+
+Step 2 — Tiling layout engine
+
+Current development stage.
+
+Implemented:
+
+master-stack layout
+
+Tiling ↔ Stacking switching
+
+persistent free window geometry
+
+automatic relayout
+
+dependency-free layout tests
+
+floating windows
+
+tiled window swapping
+
+keyboard-based swapping
+
+draggable tile boundaries
+
+The project has now moved beyond “minimal WM” territory.
+
+This is where things started getting interesting.
+
+Step 3 — Configuration layer
+
+Implemented:
+
+configuration file parsing
+
+configurable gaps
+
+configurable master ratio
+
+configurable modifier key
+
+configurable terminal
+
+example configuration
+
+terminal spawning
+
+zombie-process prevention
+
+Configuration example:
+
+assets/config.example
+
+Step 4 — Session integration and advanced window handling
+
+Implemented:
+
+display-manager session file
+
+X11 session integration
+
+floating windows
+
+tiling swaps
+
+keyboard swaps
+
+draggable tile boundaries
+
+ratio reset
+
+The roadmap is gradually becoming a list of things that already work.
+
+Keybindings
+Shortcut	Action
+mod + Space	Switch Tiling ↔ Stacking
+mod + Enter	Start terminal
+mod + Q	Close focused window
+mod + F	Toggle floating
+mod + R	Reset tiling ratios
+mod + Shift + J	Swap with next window
+mod + Shift + K	Swap with previous window
+Alt + Left Drag	Move / swap window
+Alt + Right Drag	Resize window
+Drag tile boundary	Adjust tile ratio
+
+mod is configurable through mod_key and can be either Super or Alt.
+
+Things that don't exist yet
+
+These are intentionally left for later:
+
+multiple master windows
+
+workspace management
+
+panel
+
+launcher
+
+settings application
+
+more advanced keybinding handling
+
+There is also a known limitation with XGrabKey and modifier masks.
+
+Numlock and Capslock are currently not handled independently from the grabbed modifier combinations.
+
+This will be fixed later.
+
+Probably after something else breaks.
+
+Build info
+Requirements
+
+CMake >= 3.16
+
+C++17 compiler
+
+X11 development headers
+
+Debian/Ubuntu: libx11-dev
+
+Debug build
+mkdir build
+cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 make
-```
 
-## Testen (belangrijk: NIET als je hoofd-WM!)
 
-Test bens-dm eerst in een geneste X-server, zodat je desktop niet crasht
-als er een bug in zit:
+This produces the Bens DM binary in the build directory.
 
-```sh
+Testing
+
+Do not immediately replace your existing window manager with Bens DM.
+
+Test it in a nested X server first.
+
+For example:
+
 Xephyr -screen 1280x800 :1 &
 DISPLAY=:1 ./build/bens-dm
-```
 
-Zodra dit stabiel is, testen we via een aparte TTY/X11-sessie op een echt
-systeem, daarna in QEMU/KVM met de volledige Bens OS ISO, en pas als
-laatste op fysieke hardware — conform de teststrategie.
 
-De layout-wiskunde zelf kun je los testen zonder X-server:
+This gives Bens DM its own X11 environment to break without taking the rest of your desktop with it.
 
-```sh
+The intended testing progression is:
+
+Nested Xephyr session
+
+Separate TTY/X11 session
+
+QEMU/KVM with the complete Bens OS ISO
+
+Physical hardware
+
+In that order.
+
+The layout engine can also be tested without X11:
+
 cd build
 ctest --output-on-failure
-```
 
-## Installeren als echte sessie
-
-```sh
+Installing as a real session
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
 sudo make install
-```
 
-Dit zet de binary op `/usr/bin/bens-dm` en het sessiebestand op
-`/usr/share/xsessions/bens-dm.desktop`, waarna "Bens DM" verschijnt als
-kiesbare sessie in je display manager (LightDM, SDDM, ...). Gebruik je
-`startx`/`xinit` in plaats van een display manager, zie
-`assets/xinitrc.example`.
 
-## Architectuur
+This installs:
 
-```
+/usr/bin/bens-dm
+/usr/share/xsessions/bens-dm.desktop
+
+
+After installation, the display manager should show:
+
+Bens DM
+
+
+as a selectable X11 session.
+
+At that point, Bens DM is no longer something you're launching manually from a terminal.
+
+It is now responsible for your actual desktop.
+
+Good luck.
+
+Project structure
 bens-dm/
 ├── src/
 │   ├── main.cpp
-│   ├── wm/            # WindowManager-kern (stap 1)
-│   ├── layouts/        # Master-stack tiling-engine (stap 2)
-│   ├── input/           # (volgt) losgetrokken keybinding-config
-│   ├── x11/              # (volgt) X11-hulpfuncties/wrappers
-│   └── config/          # (volgt) configuratiebestand-parsing
+│   ├── wm/             # Window manager core
+│   ├── layouts/        # Master-stack tiling engine
+│   ├── input/          # Keybinding configuration
+│   ├── x11/            # X11 helpers / wrappers
+│   └── config/         # Configuration parser
 ├── include/bensdm/
 ├── assets/
 ├── tests/
 ├── CMakeLists.txt
 └── README.md
-```
+
+Current state
+Window management       DONE
+Tiling                  DONE
+Stacking                DONE
+Floating                DONE
+Window swapping         DONE
+Tile resizing           DONE
+Configuration           DONE
+Terminal launching      DONE
+Session integration     DONE
+
+Multiple masters        NOT YET
+Workspaces              NOT YET
+Panel                   COMING SOON™
+Launcher                NO
+Settings app             NO
+Wayland                  NO
+
+
+And, most importantly:
+
+Unauthorized audio      SHIPPED
+
+
+Yes, that is a real category.
+
+No, it was not planned.
+
+Bens DM
+
+A window manager written from scratch for Bens OS.
+
+It started as:
+
+“I should probably make a minimal WM.”
+
+It is now:
+
+“Why does this thing have floating windows, tiling swaps, session integration and a configuration system?”
+
+At some point this stopped being a prototype.
+
+Nobody informed the prototype.
