@@ -1,2 +1,2 @@
 # bens-dm
-small wm, i want to build a dm on top of it
+A small window manager that I want to build a full desktop environment on top of.
