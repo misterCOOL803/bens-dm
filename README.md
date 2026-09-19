@@ -101,7 +101,7 @@ The first managed window becomes the master.
 Everything else goes into the stack.
 
 Conceptually:
-
+```text
 ┌──────────────────────┬──────────────────┐
 │                      │                  │
 │                      │     Window 2     │
@@ -114,6 +114,7 @@ Conceptually:
 │                      │                  │
 │                      │     Window 4     │
 └──────────────────────┴──────────────────┘
+```
 
 
 The layout implementation lives in:
